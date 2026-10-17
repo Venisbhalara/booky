@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "nodejs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  password      String?
+  phone         String?  @unique
+  name          String?
+  photoUrl      String?
+  address       String?
+  lat           Float?
+  lng           Float?
+  upiId         String?
+  isVerified    Boolean  @default(false)
+  isAdmin       Boolean  @default(false)
+  trustScore    Float    @default(70)
+  createdAt     DateTime @default(now())
+
+  listings     Listing[]
+  requestsSent Request[]       @relation("ReaderRequests")
+  bookingsAsOwner Booking[]    @relation("OwnerBookings")
+  bookingsAsReader Booking[]   @relation("ReaderBookings")
+  messages     Message[]
+  ratingsGiven Rating[]        @relation("Rater")
+  ratingsReceived Rating[]     @relation("Ratee")
+  disputesRaised Dispute[]    @relation("DisputeRaiser")
+  notifications Notification[]
+}
+
+model Listing {
+  id            String   @id @default(cuid())
+  ownerId       String
+  title         String
+  author        String?
+  isbn          String?
+  coverUrl      String?
+  category      String?
+  language      String   @default("English")
+  description   String?
+  condition     String
+  photos        String
+  mode          String
+  dailyRate     Float?
+  weeklyRate    Float?
+  monthlyRate   Float?
+  freeMaxDays   Int?
+  depositAmount Float    @default(0)
+  pickupOnly    Boolean  @default(true)
+  radiusKm      Float    @default(5)
+  lat           Float
+  lng           Float
+  address       String?
+  status        String   @default("ACTIVE")
+  interestCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  owner    User      @relation(fields: [ownerId], references: [id])
+  requests Request[]
+  bookings Booking[]
+}
+
+model Request {
+  id           String   @id @default(cuid())
+  listingId    String
+  readerId     String
+  type         String
+  startDate    DateTime
+  endDate      DateTime
+  message      String?
+  status       String   @default("PENDING")
+  counterType  String?
+  counterStart DateTime?
+  counterEnd   DateTime?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id])
+  reader  User    @relation("ReaderRequests", fields: [readerId], references: [id])
+  booking Booking?
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  requestId       String   @unique
+  listingId       String
+  ownerId         String
+  readerId        String
+  type            String
+  fee             Float    @default(0)
+  deposit         Float    @default(0)
+  commission      Float    @default(0)
+  lateFeePerDay   Float    @default(10)
+  status          String   @default("PENDING_PAYMENT")
+  startDate       DateTime
+  dueDate         DateTime
+  handedOverAt    DateTime?
+  receiptConfirmedAt DateTime?
+  returnedAt      DateTime?
+  returnCondition String?
+  handoverPhoto   String?
+  returnPhoto     String?
+  paymentExpiresAt DateTime?
+  createdAt       DateTime @default(now())
+
+  request     Request     @relation(fields: [requestId], references: [id])
+  listing     Listing     @relation(fields: [listingId], references: [id])
+  owner       User        @relation("OwnerBookings", fields: [ownerId], references: [id])
+  reader      User        @relation("ReaderBookings", fields: [readerId], references: [id])
+  transaction Transaction?
+  messages    Message[]
+  dispute     Dispute?
+  ratings     Rating[]
+}
+
+model Transaction {
+  id                String   @id @default(cuid())
+  bookingId         String   @unique
+  totalCharged      Float
+  fee               Float
+  deposit           Float
+  commission        Float
+  lateFee           Float    @default(0)
+  payoutToOwner     Float    @default(0)
+  refundToReader    Float    @default(0)
+  status            String   @default("HELD")
+  mockPaymentId     String?
+  createdAt         DateTime @default(now())
+  settledAt         DateTime?
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  bookingId String
+  senderId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  sender  User    @relation(fields: [senderId], references: [id])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  bookingId String
+  raterId   String
+  rateeId   String
+  stars     Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  rater   User    @relation("Rater", fields: [raterId], references: [id])
+  ratee   User    @relation("Ratee", fields: [rateeId], references: [id])
+
+  @@unique([bookingId, raterId])
+}
+
+model Dispute {
+  id                   String   @id @default(cuid())
+  bookingId            String   @unique
+  raisedById           String
+  reason               String
+  details              String?
+  status               String   @default("OPEN")
+  resolution           String?
+  amountToOwner        Float?
+  amountToReader       Float?
+  createdAt            DateTime @default(now())
+  resolvedAt           DateTime?
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  raisedBy User   @relation("DisputeRaiser", fields: [raisedById], references: [id])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  linkUrl   String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, read])
+}
+
