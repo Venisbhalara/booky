@@ -67,13 +67,6 @@ export async function GET(req: Request) {
     return +new Date(b.createdAt) - +new Date(a.createdAt);
   });
 
-  console.log("[DEBUG API] Total listings from DB:", listings.length);
-  console.log("[DEBUG API] rows after q filter:", rows.length);
-  console.log("[DEBUG API] withMeta length:", withMeta.length);
-  console.log("[DEBUG API] hasLocation:", hasLocation);
-  console.log("[DEBUG API] maxDistance:", maxDistance);
-  console.log("[DEBUG API] filtered length:", filtered.length);
-
   const hasMore = filtered.length > take;
   const page = hasMore ? filtered.slice(0, take) : filtered;
   const nextCursor = hasMore ? page[page.length - 1].id : null;

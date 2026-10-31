@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Search, User, BookOpen, PlusCircle, Bell, ArrowRight } from "lucide-react";
+import { Search, User, BookOpen, PlusCircle, Bell, ArrowRight, Sparkles } from "lucide-react";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -59,6 +59,17 @@ export function CommandMenu() {
           </Command.Empty>
 
           <Command.Group heading="Quick Links" className="px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-navy/40">
+            <Command.Item
+              onSelect={() => runCommand(() => router.push("/presentation"))}
+              className="group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-navy transition-colors aria-selected:bg-brand/10 aria-selected:text-brand"
+            >
+              <div className="grid size-8 place-items-center rounded-lg bg-brand/10 text-brand transition-colors group-aria-selected:bg-brand group-aria-selected:text-white">
+                <Sparkles className="size-4" />
+              </div>
+              Platform Showcase Deck ⚡
+              <ArrowRight className="ml-auto size-4 opacity-0 transition-opacity group-aria-selected:opacity-100" />
+            </Command.Item>
+
             <Command.Item
               onSelect={() => runCommand(() => router.push("/browse"))}
               className="group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-navy transition-colors aria-selected:bg-brand/10 aria-selected:text-brand"

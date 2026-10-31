@@ -10,6 +10,19 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ["better-sqlite3", "@prisma/adapter-better-sqlite3"],
+  outputFileTracingIncludes: {
+    "/**": ["./prisma/dev.db"],
+  },
+  async rewrites() {
+    const backendUrl = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
+    if (!backendUrl) return [];
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -21,7 +34,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "X-Frame-Options",
-            value: "DENY",
+            value: "SAMEORIGIN",
           },
           {
             key: "X-XSS-Protection",

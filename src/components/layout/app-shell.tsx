@@ -24,6 +24,7 @@ const PRIMARY_NAV = [
   { href: "/allbooks", label: "All Books" },
   { href: "/browse", label: "Borrow" },
   { href: "/list", label: "Lend" },
+  { href: "/presentation", label: "Deck ⚡" },
   { href: "/gifting", label: "Gifting" },
   { href: "/merch", label: "Merch" },
   { href: "/faq", label: "FAQ" },
@@ -163,6 +164,10 @@ export function AppShell({
         ...(user.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       ]
     : PRIMARY_NAV;
+
+  if (pathname === "/presentation") {
+    return <div className="min-h-screen w-screen bg-[#0B0F19] text-white overflow-hidden">{children}</div>;
+  }
 
   return (
     <>
