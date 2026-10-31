@@ -38,8 +38,10 @@ const ALLOWED_OPS = new Set([
 
 function verifySecret(provided: string | null): boolean {
   const expected =
-    process.env.JWT_SECRET ?? "bookyy-dev-secret-DO-NOT-USE-IN-PRODUCTION-9f2c7a";
-  if (!provided) return false;
+    process.env.NODE_ENV === "production"
+      ? process.env.JWT_SECRET
+      : (process.env.JWT_SECRET ?? "bookyy-dev-secret-DO-NOT-USE-IN-PRODUCTION-9f2c7a");
+  if (!provided || !expected) return false;
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);
   if (a.length !== b.length) return false;
@@ -78,9 +80,7 @@ export async function POST(req: Request) {
       ok: true,
       data: serializePayload(result),
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Database RPC failed";
-    return jsonError(message, 500);
+  } catch {
+    return jsonError("Database RPC failed", 500);
   }
 }
-

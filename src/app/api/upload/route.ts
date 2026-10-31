@@ -20,8 +20,8 @@ export async function POST(req: Request) {
     // Sharp strips EXIF metadata (including GPS), validates the image structure,
     // and encodes a compact WebP data URI that persists directly in the database.
     const webpBuffer = await sharp(buffer)
-      .resize({ width: 1000, withoutEnlargement: true })
-      .webp({ quality: 78 })
+      .resize({ width: 720, withoutEnlargement: true })
+      .webp({ quality: 72 })
       .toBuffer();
 
     const dataUrl = `data:image/webp;base64,${webpBuffer.toString("base64")}`;
